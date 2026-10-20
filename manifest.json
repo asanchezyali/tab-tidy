@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Tidy",
+  "short_name": "Tab Tidy",
+  "version": "0.1.0",
+  "description": "Stops duplicate tabs: if a page is already open, Tab Tidy switches to it. Sorts your tabs by URL in one click.",
+  "minimum_chrome_version": "116",
+  "permissions": ["tabs", "storage"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Tab Tidy",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": false
+  },
+  "commands": {
+    "sort-tabs": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Sort tabs in the current window by URL"
+    },
+    "close-duplicates": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "Close duplicate tabs in the current window"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

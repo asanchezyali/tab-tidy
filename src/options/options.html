@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tab Tidy settings</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="options">
+    <h1>Tab Tidy settings</h1>
+
+    <fieldset>
+      <legend>Duplicates</legend>
+      <label class="toggle">
+        <input type="checkbox" name="blockDuplicates" />
+        <span>When a new tab opens a page that is already open, switch to the open tab and close the new one</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" name="searchAllWindows" />
+        <span>Look for the open tab in every window, not just the current one</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Two URLs are the same page when they differ only in…</legend>
+      <label class="toggle">
+        <input type="checkbox" name="ignoreHash" />
+        <span>the <code>#fragment</code> (<code>/docs#intro</code> = <code>/docs#setup</code>)</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" name="ignoreQuery" />
+        <span>the <code>?query</code> (<code>/search?q=a</code> = <code>/search?q=b</code>)</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" name="ignoreTrailingSlash" />
+        <span>a trailing slash (<code>/docs/</code> = <code>/docs</code>)</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" name="ignoreWww" />
+        <span>a leading <code>www.</code> (<code>www.example.com</code> = <code>example.com</code>)</span>
+      </label>
+    </fieldset>
+
+    <p class="hint">
+      Shortcuts: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> sorts tabs by URL,
+      <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> closes duplicates. Change them at
+      <code>chrome://extensions/shortcuts</code>.
+    </p>
+    <p id="saved" class="status" aria-live="polite"></p>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
