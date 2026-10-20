@@ -40,6 +40,9 @@ upload: the store rejects a version it has already seen.
 
 ## 3. Create the item
 
+Every field, ready to paste, is in [store/LISTING.md](../store/LISTING.md).
+The images are in `store/`; re-render them with `scripts/make-store-assets.sh`.
+
 In the dashboard: **Add new item**, upload the zip, then fill in the tabs.
 
 ### Store listing

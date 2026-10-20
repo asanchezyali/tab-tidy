@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tab Tidy store assets</title>
+    <!-- Renders the Chrome Web Store images. Pick one with ?view=<name>;
+         scripts/make-store-assets.sh screenshots each view at its store size. -->
+    <link rel="stylesheet" href="../src/styles.css" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --fg: #1f2933;
+        --muted: #616e7c;
+        --accent: #2563eb;
+        --accent-fg: #ffffff;
+        --border: #d9e2ec;
+        --canvas: #eef2f7;
+        --chrome: #dee3ea;
+        --tab: #f6f8fb;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--canvas);
+      }
+      .view {
+        display: none;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+      .view.on {
+        display: block;
+      }
+
+      /* Shared pieces */
+      .caption {
+        position: absolute;
+        left: 64px;
+        top: 52px;
+        right: 64px;
+      }
+      .caption h2 {
+        font: 700 40px/1.15 system-ui, -apple-system, sans-serif;
+        margin: 0 0 10px;
+        color: #0f172a;
+      }
+      .caption p {
+        font: 400 21px/1.4 system-ui, -apple-system, sans-serif;
+        margin: 0;
+        color: var(--muted);
+      }
+      .browser {
+        position: absolute;
+        left: 64px;
+        right: 64px;
+        top: 200px;
+        bottom: 0;
+        background: var(--bg);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+      }
+      .strip {
+        display: flex;
+        gap: 2px;
+        padding: 10px 10px 0;
+        background: var(--chrome);
+      }
+      .tab {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 10px;
+        border-radius: 9px 9px 0 0;
+        background: var(--tab);
+        font: 13px system-ui, -apple-system, sans-serif;
+        color: #334155;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .tab.active {
+        background: var(--bg);
+        font-weight: 600;
+      }
+      .tab.pinned {
+        flex: 0 0 38px;
+        justify-content: center;
+        padding: 9px 0;
+      }
+      .tab.flash {
+        outline: 3px solid #22c55e;
+        outline-offset: -3px;
+      }
+      .fav {
+        flex: 0 0 auto;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        color: #fff;
+        font: 700 10px/16px system-ui, sans-serif;
+        text-align: center;
+      }
+      .omnibox {
+        margin: 10px 14px;
+        padding: 9px 16px;
+        background: #f1f4f8;
+        border-radius: 20px;
+        font: 14px system-ui, -apple-system, sans-serif;
+        color: #475569;
+        display: flex;
+        justify-content: space-between;
+      }
+      .omnibox .ext {
+        width: 20px;
+        height: 20px;
+      }
+      .page {
+        padding: 26px 34px;
+      }
+      .line {
+        height: 14px;
+        border-radius: 7px;
+        background: #e8edf3;
+        margin: 0 0 14px;
+      }
+      .popup-card {
+        position: absolute;
+        width: 300px;
+        padding: 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+        font: 14px/1.45 system-ui, -apple-system, sans-serif;
+      }
+      .popup-card header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .label {
+        font: 600 13px system-ui, -apple-system, sans-serif;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 8px;
+      }
+      /* Annotation drawn on top of the screenshot, not part of the extension UI. */
+      .note {
+        position: absolute;
+        margin: 0;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: #dcfce7;
+        color: #14532d;
+        font: 600 15px system-ui, -apple-system, sans-serif;
+      }
+
+      /* Settings view */
+      .settings-card {
+        position: absolute;
+        left: 50%;
+        top: 196px;
+        transform: translateX(-50%);
+        width: 640px;
+        background: var(--bg);
+        border-radius: 14px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+      }
+
+      /* Promo tiles */
+      .promo {
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%);
+        color: #fff;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .promo .brand {
+        position: absolute;
+        display: flex;
+        align-items: center;
+      }
+      .promo .brand img {
+        border-radius: 22%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      }
+      .promo h1 {
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      .promo p {
+        margin: 0;
+        opacity: 0.92;
+      }
+      .mini-strip {
+        position: absolute;
+        display: flex;
+        gap: 4px;
+      }
+      .mini-strip .tab {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 1280x800: auto-sorted tabs and the popup -->
+    <section class="view" id="sorted">
+      <div class="caption">
+        <h2>Your tabs, always sorted by site</h2>
+        <p>Open a page and Tab Tidy slides it next to the others from the same site. Pinned tabs and groups stay put.</p>
+      </div>
+      <div class="browser">
+        <div class="strip" id="sorted-strip"></div>
+        <div class="omnibox"><span>docs.github.com/en/actions</span><img class="ext" src="../icons/icon-32.png" alt="" /></div>
+        <div class="page">
+          <div class="line" style="width: 46%"></div>
+          <div class="line" style="width: 72%"></div>
+          <div class="line" style="width: 64%"></div>
+          <div class="line" style="width: 58%"></div>
+          <div class="line" style="width: 69%"></div>
+          <div class="line" style="width: 40%"></div>
+        </div>
+        <div class="popup-card" style="right: 14px; top: 100px">
+          <header><img src="../icons/icon-32.png" alt="" width="20" height="20" /><h1>Tab Tidy</h1></header>
+          <label class="toggle"><input type="checkbox" checked /><span>Switch to the open tab instead of opening a duplicate</span></label>
+          <label class="toggle"><input type="checkbox" checked /><span>Keep tabs sorted by URL automatically</span></label>
+          <p class="status">No duplicate tabs in this window.</p>
+          <div class="actions">
+            <button type="button" disabled>Close duplicates</button>
+            <button type="button">Sort tabs by URL</button>
+          </div>
+          <footer><a href="#">Settings</a></footer>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1280x800: duplicate blocked -->
+    <section class="view" id="duplicate">
+      <div class="caption">
+        <h2>Already open? You go straight to it</h2>
+        <p>Click a link to a page you already have open, and Tab Tidy switches to that tab instead of opening a second copy.</p>
+      </div>
+      <div class="browser">
+        <div class="strip" id="duplicate-strip"></div>
+        <div class="omnibox"><span>calendar.google.com/calendar/u/0/r/week</span><img class="ext" src="../icons/icon-32.png" alt="" /></div>
+        <div class="page" style="padding-top: 64px">
+          <div class="line" style="width: 38%"></div>
+          <div class="line" style="width: 70%"></div>
+          <div class="line" style="width: 61%"></div>
+          <div class="line" style="width: 66%"></div>
+          <div class="line" style="width: 52%"></div>
+        </div>
+        <p class="note" style="left: 232px; top: 104px">↑ Already open: Tab Tidy brought you back here instead of opening a copy</p>
+      </div>
+    </section>
+
+    <!-- 1280x800: settings -->
+    <section class="view" id="settings">
+      <div class="caption">
+        <h2>You decide what counts as the same page</h2>
+        <p>Ignore the #fragment, a trailing slash, the ?query or www. No tracking, no network requests, open source.</p>
+      </div>
+      <div class="settings-card">
+        <div class="options" style="max-width: none">
+          <h1>Tab Tidy settings</h1>
+          <fieldset>
+            <legend>Duplicates</legend>
+            <label class="toggle"><input type="checkbox" checked /><span>When a new tab opens a page that is already open, switch to the open tab and close the new one</span></label>
+            <label class="toggle"><input type="checkbox" checked /><span>Look for the open tab in every window, not just the current one</span></label>
+          </fieldset>
+          <fieldset>
+            <legend>Sorting</legend>
+            <label class="toggle"><input type="checkbox" checked /><span>Keep every window sorted by URL as tabs open and navigate (pinned tabs and tab groups stay in place)</span></label>
+          </fieldset>
+          <fieldset>
+            <legend>Two URLs are the same page when they differ only in…</legend>
+            <label class="toggle"><input type="checkbox" checked /><span>the <code>#fragment</code> (<code>/docs#intro</code> = <code>/docs#setup</code>)</span></label>
+            <label class="toggle"><input type="checkbox" /><span>the <code>?query</code> (<code>/search?q=a</code> = <code>/search?q=b</code>)</span></label>
+            <label class="toggle"><input type="checkbox" checked /><span>a trailing slash (<code>/docs/</code> = <code>/docs</code>)</span></label>
+            <label class="toggle"><input type="checkbox" /><span>a leading <code>www.</code> (<code>www.example.com</code> = <code>example.com</code>)</span></label>
+          </fieldset>
+        </div>
+      </div>
+    </section>
+
+    <!-- 440x280: small promo tile -->
+    <section class="view promo" id="promo">
+      <div class="brand" style="left: 36px; top: 46px; gap: 16px">
+        <img src="../icons/icon-128.png" alt="" width="76" height="76" />
+        <div>
+          <h1 style="font-size: 38px">Tab Tidy</h1>
+          <p style="font-size: 17px; margin-top: 4px">One tab per page</p>
+        </div>
+      </div>
+      <p style="position: absolute; left: 36px; right: 30px; top: 160px; font-size: 22px; line-height: 1.35">
+        No duplicate tabs.<br />Always sorted by site.
+      </p>
+    </section>
+
+    <!-- 1400x560: marquee -->
+    <section class="view promo" id="marquee">
+      <div class="brand" style="left: 110px; top: 150px; gap: 28px">
+        <img src="../icons/icon-128.png" alt="" width="132" height="132" />
+        <div>
+          <h1 style="font-size: 72px">Tab Tidy</h1>
+          <p style="font-size: 28px; margin-top: 6px">No duplicate tabs. Always sorted by site.</p>
+        </div>
+      </div>
+      <div class="mini-strip" id="marquee-strip" style="left: 110px; right: 110px; bottom: 90px"></div>
+    </section>
+
+    <script>
+      const SITES = {
+        figma: ['#a259ff', 'F', 'Figma'],
+        github: ['#24292f', 'G', 'GitHub'],
+        ghdocs: ['#24292f', 'G', 'GitHub Docs'],
+        gcal: ['#1a73e8', '31', 'Google Calendar'],
+        gdocs: ['#4285f4', 'D', 'Google Docs'],
+        gmail: ['#ea4335', 'M', 'Gmail'],
+        hn: ['#ff6600', 'Y', 'Hacker News'],
+        mdn: ['#1b1b1b', 'M', 'MDN Web Docs'],
+        notion: ['#111111', 'N', 'Notion'],
+        wiki: ['#636466', 'W', 'Wikipedia'],
+        yt: ['#ff0000', '▶', 'YouTube'],
+      };
+
+      function tab(key, extra = '', title) {
+        const [color, letter, name] = SITES[key];
+        const label = extra.includes('pinned') ? '' : `<span>${title ?? name}</span>`;
+        return `<div class="tab ${extra}"><span class="fav" style="background:${color}">${letter}</span>${label}</div>`;
+      }
+
+      document.getElementById('sorted-strip').innerHTML = [
+        tab('gmail', 'pinned'),
+        tab('gcal', 'pinned'),
+        tab('figma', '', 'Figma · Onboarding'),
+        tab('github', '', 'tab-tidy · GitHub'),
+        tab('github', '', 'Pull requests'),
+        tab('ghdocs', 'active', 'Actions · GitHub Docs'),
+        tab('gdocs', '', 'Q4 plan · Docs'),
+        tab('mdn', '', 'tabs.move() · MDN'),
+        tab('wiki', '', 'Tab (interface)'),
+        tab('yt', '', 'YouTube'),
+      ].join('');
+
+      document.getElementById('duplicate-strip').innerHTML = [
+        tab('gmail', 'pinned'),
+        tab('figma', '', 'Figma · Onboarding'),
+        tab('gcal', 'active flash', 'Week · Google Calendar'),
+        tab('github', '', 'tab-tidy · GitHub'),
+        tab('hn', '', 'Hacker News'),
+        tab('notion', '', 'Roadmap · Notion'),
+        tab('wiki', '', 'Tab (interface)'),
+      ].join('');
+
+      document.getElementById('marquee-strip').innerHTML = [
+        tab('figma'),
+        tab('github'),
+        tab('ghdocs'),
+        tab('gdocs'),
+        tab('mdn'),
+        tab('wiki'),
+      ].join('');
+
+      const view = new URLSearchParams(location.search).get('view') ?? 'sorted';
+      document.getElementById(view)?.classList.add('on');
+    </script>
+  </body>
+</html>

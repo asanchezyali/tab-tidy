@@ -59,6 +59,7 @@ Requires Node 20 or newer. There are no dependencies.
 npm test          # unit tests for URL matching, sorting and duplicate detection
 npm run build     # writes dist/tab-tidy-<version>.zip for the Chrome Web Store
 scripts/make-icons.sh   # re-renders icons/*.png from icons/icon.svg (needs ImageMagick)
+scripts/make-store-assets.sh   # re-renders the store images in store/ (needs Chrome)
 ```
 
 ```
