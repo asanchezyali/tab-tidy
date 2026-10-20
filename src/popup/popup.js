@@ -7,6 +7,7 @@ import {
 } from '../lib/actions.js';
 
 const toggle = document.getElementById('blockDuplicates');
+const autoSortToggle = document.getElementById('autoSort');
 const status = document.getElementById('status');
 const closeButton = document.getElementById('closeDuplicates');
 
@@ -25,6 +26,14 @@ async function refreshStatus() {
 
 toggle.addEventListener('change', () => saveSettings({ blockDuplicates: toggle.checked }));
 
+autoSortToggle.addEventListener('change', async () => {
+  await saveSettings({ autoSort: autoSortToggle.checked });
+  if (autoSortToggle.checked) {
+    await sortWindow(await currentWindowId());
+    status.textContent = 'Tabs sorted by URL.';
+  }
+});
+
 closeButton.addEventListener('click', async () => {
   const closed = await closeDuplicates(await currentWindowId());
   status.textContent = `Closed ${closed} tab${closed === 1 ? '' : 's'}.`;
@@ -41,5 +50,7 @@ document.getElementById('openOptions').addEventListener('click', (event) => {
   chrome.runtime.openOptionsPage();
 });
 
-toggle.checked = (await getSettings()).blockDuplicates;
+const settings = await getSettings();
+toggle.checked = settings.blockDuplicates;
+autoSortToggle.checked = settings.autoSort;
 await refreshStatus();

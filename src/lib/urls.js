@@ -14,6 +14,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   ignoreTrailingSlash: true,
   // "www.example.com" and "example.com" count as the same site.
   ignoreWww: false,
+  // Keep every window sorted by URL as tabs open and navigate.
+  autoSort: true,
 });
 
 const DEDUPABLE_PROTOCOLS = new Set(['http:', 'https:', 'file:', 'ftp:']);
@@ -91,6 +93,11 @@ export function compareUrls(a, b) {
 
 const NO_GROUP = -1;
 
+// A tab that is still loading has its destination in pendingUrl.
+function tabUrl(tab) {
+  return tab.url || tab.pendingUrl || '';
+}
+
 function isFree(tab) {
   return !tab.pinned && (tab.groupId ?? NO_GROUP) === NO_GROUP;
 }
@@ -99,7 +106,9 @@ function isFree(tab) {
 // moves ({id, index}) that sort them by URL. Pinned tabs and tab groups stay
 // where they are: only each run of consecutive loose tabs is sorted, because
 // moving a tab across a group would pull it into or out of that group.
-// Applying the moves in order, one at a time, gives the sorted window.
+// Applying the moves in order, one at a time, gives the sorted window. Moves
+// that would leave a tab where it already is are skipped, so a sorted window
+// returns no moves at all.
 export function sortMoves(tabs) {
   const ordered = [...tabs].sort((a, b) => a.index - b.index);
   const runs = [];
@@ -117,8 +126,18 @@ export function sortMoves(tabs) {
   const moves = [];
   for (const run of runs) {
     const start = run[0].index;
-    const sorted = [...run].sort((a, b) => compareUrls(a.url, b.url) || a.index - b.index);
-    sorted.forEach((tab, offset) => moves.push({ id: tab.id, index: start + offset }));
+    const sorted = [...run].sort(
+      (a, b) => compareUrls(tabUrl(a), tabUrl(b)) || a.index - b.index,
+    );
+    // Simulate the run as chrome.tabs.move changes it: remove, then insert.
+    const order = run.map((tab) => tab.id);
+    sorted.forEach((tab, offset) => {
+      const from = order.indexOf(tab.id);
+      if (from === offset) return;
+      order.splice(from, 1);
+      order.splice(offset, 0, tab.id);
+      moves.push({ id: tab.id, index: start + offset });
+    });
   }
   return moves;
 }

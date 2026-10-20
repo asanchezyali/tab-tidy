@@ -45,21 +45,50 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (fresh.delete(tabId)) await writeFresh(fresh);
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const url = changeInfo.url;
-  if (!url || isPlaceholderUrl(url)) return;
+// Auto-sort waits until the window has been quiet for a moment, so opening
+// several tabs at once (or a burst of redirects) triggers a single sort.
+const AUTO_SORT_DELAY_MS = 800;
+// While the user drags a tab, the browser refuses to move tabs. Try again later.
+const DRAG_RETRY_MS = 1_000;
+const MAX_SORT_ATTEMPTS = 5;
+const sortTimers = new Map();
 
+function scheduleSort(windowId, attempt = 1) {
+  clearTimeout(sortTimers.get(windowId));
+  const delay = attempt === 1 ? AUTO_SORT_DELAY_MS : DRAG_RETRY_MS;
+  sortTimers.set(
+    windowId,
+    setTimeout(async () => {
+      sortTimers.delete(windowId);
+      try {
+        await sortWindow(windowId);
+      } catch (error) {
+        // The window may have closed; only a busy tab strip is worth retrying.
+        if (attempt < MAX_SORT_ATTEMPTS && /dragging|cannot be edited/i.test(error.message)) {
+          scheduleSort(windowId, attempt + 1);
+        }
+      }
+    }, delay),
+  );
+}
+
+async function autoSort(windowId) {
+  if ((await getSettings()).autoSort) scheduleSort(windowId);
+}
+
+// Returns true when the tab duplicated an open page and was closed.
+async function closeIfDuplicate(tabId, url, tab) {
   const fresh = await readFresh();
-  if (!fresh.has(tabId)) return;
+  if (!fresh.has(tabId)) return false;
   // The tab now has a real destination, so from here on it is a normal tab.
   fresh.delete(tabId);
   await writeFresh(fresh);
 
   const settings = await getSettings();
-  if (!settings.blockDuplicates) return;
+  if (!settings.blockDuplicates) return false;
 
   const key = normalizeUrl(url, settings);
-  if (key === null) return;
+  if (key === null) return false;
 
   const query = settings.searchAllWindows ? {} : { windowId: tab.windowId };
   const candidates = await chrome.tabs.query(query);
@@ -69,10 +98,28 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       other.incognito === tab.incognito &&
       normalizeUrl(other.url || other.pendingUrl, settings) === key,
   );
-  if (!existing) return;
+  if (!existing) return false;
 
   await focusTab(existing);
   await chrome.tabs.remove(tabId);
+  return true;
+}
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  // Pinning, unpinning or grouping changes which tabs are sortable.
+  if ('pinned' in changeInfo || 'groupId' in changeInfo) {
+    await autoSort(tab.windowId);
+    return;
+  }
+
+  const url = changeInfo.url;
+  if (!url || isPlaceholderUrl(url)) return;
+  if (await closeIfDuplicate(tabId, url, tab)) return;
+  await autoSort(tab.windowId);
+});
+
+chrome.tabs.onAttached.addListener(async (tabId, { newWindowId }) => {
+  await autoSort(newWindowId);
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {

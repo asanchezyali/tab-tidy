@@ -147,6 +147,35 @@ describe('sortMoves', () => {
     assert.deepEqual(applyMoves(tabs, sortMoves(tabs)), [1, 2, 4, 3]);
   });
 
+  it('returns no moves for a window that is already sorted', () => {
+    const tabs = [
+      { id: 1, index: 0, url: 'https://a.com/' },
+      { id: 2, index: 1, url: 'https://b.com/' },
+      { id: 3, index: 2, url: 'https://c.com/' },
+    ];
+    assert.deepEqual(sortMoves(tabs), []);
+  });
+
+  it('moves only the tab that is out of place', () => {
+    const tabs = [
+      { id: 1, index: 0, url: 'https://a.com/' },
+      { id: 2, index: 1, url: 'https://c.com/' },
+      { id: 3, index: 2, url: 'https://d.com/' },
+      { id: 4, index: 3, url: 'https://b.com/' },
+    ];
+    const moves = sortMoves(tabs);
+    assert.deepEqual(moves, [{ id: 4, index: 1 }]);
+    assert.deepEqual(applyMoves(tabs, moves), [1, 4, 2, 3]);
+  });
+
+  it('sorts a loading tab by its pending URL', () => {
+    const tabs = [
+      { id: 1, index: 0, url: 'https://b.com/' },
+      { id: 2, index: 1, url: '', pendingUrl: 'https://a.com/' },
+    ];
+    assert.deepEqual(applyMoves(tabs, sortMoves(tabs)), [2, 1]);
+  });
+
   it('never moves a tab across a tab group', () => {
     const tabs = [
       { id: 1, index: 0, url: 'https://d.com/' },

@@ -59,8 +59,8 @@ Suggested description:
 
 > Tab Tidy keeps one tab per page. When a new tab opens a page you already
 > have open, it switches you to that tab and closes the new one. One click
-> sorts your tabs by site and URL, and another closes the duplicates you
-> already have. Settings let you decide what counts as the same page: the
+> keeps every window sorted by site and URL as you browse, and one click
+> closes the duplicates you already have. Settings let you decide what counts as the same page: the
 > #fragment, a trailing slash, the ?query, or a leading www.
 >
 > Tab Tidy leaves pinned tabs, tab groups, browser pages and restored sessions
@@ -71,8 +71,8 @@ Suggested description:
 
 | Field | Answer |
 |---|---|
-| Single purpose | "Prevents duplicate tabs by switching to an already-open tab, and sorts tabs by URL." |
-| `tabs` justification | "Reads the URL of open tabs to detect when a newly opened tab duplicates an open page, to switch to the existing tab, and to sort tabs by URL. URLs are compared on the device and never stored or transmitted." |
+| Single purpose | "Keeps tabs tidy: prevents duplicate tabs by switching to the already-open tab, and keeps tabs sorted by URL." |
+| `tabs` justification | "Reads the URL of open tabs to detect when a newly opened tab duplicates an open page, to switch to the existing tab, and to keep tabs sorted by URL. URLs are compared on the device and never stored or transmitted." |
 | `storage` justification | "Saves the user's settings (which URL parts to ignore) and, for a few seconds, the ids of newly opened tabs." |
 | Remote code | "No, I am not using remote code." |
 | Data usage | The store's FAQ says local processing still counts as *handling* user data, and that anything handling user data needs a privacy policy. Tick **Web history** (the extension reads tab URLs), then certify the three limited-use statements: no sale, no use unrelated to the single purpose, no creditworthiness use. |

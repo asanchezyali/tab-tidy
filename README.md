@@ -4,9 +4,10 @@ A Chrome and Brave extension that keeps one tab per page.
 
 - **No duplicates.** When a new tab opens a page that is already open, Tab Tidy
   switches to the open tab and closes the new one.
-- **Sort by URL.** One click (or `Alt+Shift+S`) sorts the tabs of the current
-  window by site, then by path, so `github.com`, `docs.github.com` and
-  `www.github.com` end up next to each other.
+- **Always sorted by URL.** Every window stays sorted by site, then by path, as
+  tabs open and navigate, so `github.com`, `docs.github.com` and
+  `www.github.com` sit next to each other. Turn it off in the popup and sort on
+  demand instead with one click (or `Alt+Shift+S`).
 - **Close duplicates.** One click (or `Alt+Shift+D`) closes the duplicates that
   are already open, keeping the active tab.
 
@@ -24,6 +25,7 @@ default Tab Tidy also treats these as the same page:
 | Ignore the `?query` | off | `/search?q=a` = `/search?q=b` |
 | Ignore a leading `www.` | off | `www.example.com` = `example.com` |
 | Look in every window | on | a tab in another window counts |
+| Keep tabs sorted automatically | on | sorts the window after a tab opens or navigates |
 
 Query parameter order never matters: `?a=1&b=2` = `?b=2&a=1`.
 
@@ -35,6 +37,9 @@ Query parameter order never matters: `?a=1&b=2` = `?b=2&a=1`.
 - **Session restore.** For ten seconds after the browser starts, restored tabs
   are not touched.
 - **Browser pages** (`chrome://`, `brave://`, extension pages, the new tab page).
+- **A burst of new tabs.** Auto-sort waits until the window has been quiet for
+  under a second, so opening ten links triggers one sort, not ten. If you are
+  dragging a tab, it waits and tries again.
 - **Pinned tabs and tab groups** when sorting. Only runs of loose tabs between
   them are sorted, so no tab is pulled into or out of a group.
 - **Incognito and normal windows** never match each other.
