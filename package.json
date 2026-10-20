@@ -1,6 +1,6 @@
 {
   "name": "tab-tidy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Chrome and Brave extension that stops duplicate tabs and sorts tabs by URL.",
   "type": "module",

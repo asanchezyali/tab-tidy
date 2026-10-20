@@ -8,7 +8,7 @@ Background and policy notes are in [docs/PUBLISHING.md](../docs/PUBLISHING.md).
 Upload `dist/tab-tidy-<version>.zip` (run `npm run build` first).
 
 The store reads the **name** (`Tab Tidy`) and the **summary** from
-`manifest.json`. The summary has a 132-character limit; ours is 110.
+`manifest.json`. The summary has a 132-character limit; ours is 117.
 
 ## Store listing tab
 

@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Tab Tidy",
   "short_name": "Tab Tidy",
-  "version": "0.1.0",
-  "description": "Stops duplicate tabs: if a page is already open, Tab Tidy switches to it. Sorts your tabs by URL in one click.",
+  "version": "0.1.1",
+  "description": "Stops duplicate tabs: if a page is already open, Tab Tidy switches to it. Keeps your tabs sorted by URL automatically.",
   "minimum_chrome_version": "116",
   "permissions": ["tabs", "storage"],
   "background": {
